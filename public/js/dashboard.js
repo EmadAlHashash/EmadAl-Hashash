@@ -1,5 +1,3 @@
-// app.js - متوافق مع Laravel
-
 // -------------------------------
 // 1. التبويبات الرئيسية
 // -------------------------------
@@ -86,13 +84,24 @@ let currentEditId = null;
 let currentDeleteTab = null;
 let currentDeleteId = null;
 
-// جلب CSRF من meta tag
+// -------------------------------
+// 4. جلب CSRF من meta tag
+// -------------------------------
 function getCSRF() {
-    return document
-        .querySelector('meta[name="csrf-token"]')
-        .getAttribute("content");
+    const tag = document.querySelector('meta[name="csrf-token"]');
+    return tag ? tag.getAttribute("content") : "";
 }
 
+// -------------------------------
+// 5. الأحداث الرئيسية للأزرار
+// -------------------------------
+addPersonalInfoBtn.addEventListener("click", () => {
+    if (!Array.isArray(personalInfoData) || personalInfoData.length === 0) {
+        openForm("add", "personalInfo");
+    } else {
+        openForm("edit", "personalInfo", personalInfoData[0].id);
+    }
+});
 addEducationBtn.addEventListener("click", () =>
     openForm("add", "educationTab")
 );
@@ -105,21 +114,90 @@ addSkillInnerBtn.addEventListener("click", () =>
 addProjectBtn.addEventListener("click", () => openProjectModal(null, "add"));
 
 // -------------------------------
-// 4. personalInfo - إدخال مرة واحدة فقط
+// 6. جلب البيانات من API
 // -------------------------------
-addPersonalInfoBtn.addEventListener("click", () => {
-    if (personalInfoData.length === 0) {
-        openForm("add", "personalInfo");
-    } else {
-        openForm("edit", "personalInfo", personalInfoData[0].id);
+async function fetchPersonalInfo() {
+    try {
+        const response = await fetch("/api/personal-info");
+        const data = await response.json();
+        if (Array.isArray(data)) {
+            personalInfoData = data;
+        } else if (Array.isArray(data.data)) {
+            personalInfoData = data.data;
+        } else if (typeof data === "object" && data !== null) {
+            personalInfoData = [data];
+        } else {
+            personalInfoData = [];
+        }
+        updatePersonalInfoCard();
+    } catch (error) {
+        console.error("Error fetching personal info:", error);
+        personalInfoData = [];
+        updatePersonalInfoCard();
     }
-});
+}
+async function fetchEducation() {
+    try {
+        const response = await fetch("/api/education");
+        const data = await response.json();
+        if (Array.isArray(data)) {
+            educationData = data;
+        } else if (Array.isArray(data.data)) {
+            educationData = data.data;
+        } else if (typeof data === "object" && data !== null) {
+            educationData = [data];
+        } else {
+            educationData = [];
+        }
+        renderEducationTable();
+    } catch (error) {
+        educationData = [];
+        renderEducationTable();
+    }
+}
+async function fetchExperience() {
+    try {
+        const response = await fetch("/api/experience");
+        const data = await response.json();
+        experienceData = Array.isArray(data) ? data : data.data || [];
+        renderExperienceTable();
+    } catch (error) {
+        experienceData = [];
+        renderExperienceTable();
+    }
+}
+async function fetchSkills() {
+    try {
+        const response = await fetch("/api/skills");
+        const data = await response.json();
+        skillsInnerData = Array.isArray(data) ? data : data.data || [];
+        renderSkillsInnerTable();
+    } catch (error) {
+        skillsInnerData = [];
+        renderSkillsInnerTable();
+    }
+}
+async function fetchProjects() {
+    try {
+        const response = await fetch("/api/projects");
+        const data = await response.json();
+        projectsData = Array.isArray(data) ? data : data.data || [];
+        renderProjects(projectsData);
+        filterProjects("all");
+    } catch (error) {
+        projectsData = [];
+        renderProjects([]);
+    }
+}
 
+// -------------------------------
+// 7. تحديث وعرض بيانات Personal Info
+// -------------------------------
 function updatePersonalInfoCard() {
     const container = document.getElementById("personalInfoCard");
     if (!container) return;
 
-    if (personalInfoData.length === null) {
+    if (!Array.isArray(personalInfoData) || personalInfoData.length === 0) {
         container.innerHTML = `
       <div style="text-align: center; color: #f66; font-size: 18px; padding: 30px;">
 No data
@@ -144,7 +222,7 @@ No data
       <div class="row">
         <div class="home-text">
           <h1>${info.fullName || "الاسم غير متوفر"}</h1>
-          <h2>${info.jobTitles || "الاسم غير متوفر"}</h2>
+          <h2>${info.jobTitles || "المسمى غير متوفر"}</h2>
           <p>${info.bio || ""}</p>
         </div>
         <div class="home-img">
@@ -168,71 +246,10 @@ No data
         });
     }
 }
-async function fetchPersonalInfo() {
-    try {
-        const response = await fetch("/api/personal-info");
-        const data = await response.json();
-        // إذا كان API يرجع {data: [...]}
-        personalInfoData = Array.isArray(data) ? data : data.data || [];
-        updatePersonalInfoCard();
-    } catch (error) {
-        console.error("Error fetching personal info:", error);
-        personalInfoData = [];
-        updatePersonalInfoCard();
-    }
-}
-// جلب بيانات التعليم
-async function fetchEducation() {
-    try {
-        const response = await fetch("/api/education");
-        const data = await response.json();
-        educationData = Array.isArray(data) ? data : data.data || [];
-        renderEducationTable();
-    } catch (error) {
-        educationData = [];
-        renderEducationTable();
-    }
-}
 
-// جلب الخبرات
-async function fetchExperience() {
-    try {
-        const response = await fetch("/api/experience");
-        const data = await response.json();
-        experienceData = Array.isArray(data) ? data : data.data || [];
-        renderExperienceTable();
-    } catch (error) {
-        experienceData = [];
-        renderExperienceTable();
-    }
-}
-
-// جلب المهارات
-async function fetchSkills() {
-    try {
-        const response = await fetch("/api/skills");
-        const data = await response.json();
-        skillsInnerData = Array.isArray(data) ? data : data.data || [];
-        renderSkillsInnerTable();
-    } catch (error) {
-        skillsInnerData = [];
-        renderSkillsInnerTable();
-    }
-}
-
-// جلب المشاريع
-async function fetchProjects() {
-    try {
-        const response = await fetch("/api/projects");
-        const data = await response.json();
-        projectsData = Array.isArray(data) ? data : data.data || [];
-        renderProjects(projectsData);
-        filterProjects("all");
-    } catch (error) {
-        projectsData = [];
-        renderProjects([]);
-    }
-}
+// -------------------------------
+// 8. إعداد معاينة الصورة
+// -------------------------------
 function setupImagePreview(fileInputId, previewImageId, iconId = null) {
     const fileInput = document.getElementById(fileInputId);
     const previewImage = document.getElementById(previewImageId);
@@ -255,13 +272,12 @@ function setupImagePreview(fileInputId, previewImageId, iconId = null) {
 }
 
 // -------------------------------
-// 5. فتح النموذج حسب التبويب
+// 9. فتح النموذج حسب التبويب
 // -------------------------------
 function openForm(action, tab, id = null) {
     currentAction = action;
     currentInnerTab = tab;
     currentEditId = id;
-
     formFieldsContainer.innerHTML = "";
 
     // personalInfo
@@ -323,12 +339,9 @@ function openForm(action, tab, id = null) {
             const data = educationData.find((item) => item.id === id);
             if (data) {
                 document.getElementById("degreeInput").value = data.degree;
-                document.getElementById("universityInput").value =
-                    data.university;
-                document.getElementById("theDetailsInput").value =
-                    data.thedetails;
-                document.getElementById("graduationYearInput").value =
-                    data.graduationYear;
+                document.getElementById("universityInput").value = data.university;
+                document.getElementById("theDetailsInput").value = data.thedetails;
+                document.getElementById("graduationYearInput").value = data.graduationYear;
             }
         }
     }
@@ -381,8 +394,7 @@ function openForm(action, tab, id = null) {
         if (action === "edit" && id !== null) {
             const data = skillsInnerData.find((item) => item.id === id);
             if (data) {
-                document.getElementById("skillNameInput").value =
-                    data.skillName;
+                document.getElementById("skillNameInput").value = data.skillName;
                 document.getElementById("levelInput").value = data.level;
             }
         }
@@ -392,11 +404,89 @@ function openForm(action, tab, id = null) {
 }
 
 // -------------------------------
-// 6. حفظ النموذج لأي تبويب
+// 10. فتح نافذة إضافة/تعديل مشروع
+// -------------------------------
+function openProjectModal(project = null, action = "add") {
+    const isEdit = action === "edit";
+    const defaultProject = {
+        id: null,
+        title: "",
+        details: "",
+        technologiesused: "",
+        Role: "",
+        ViewOnline: "",
+        image: "",
+        type: "",
+    };
+    project = project || defaultProject;
+    currentInnerTab = "projectTab";
+    currentAction = action;
+    currentEditId = project.id;
+    formTitle.textContent = isEdit ? "Edit Project" : "Add Project";
+    formFieldsContainer.innerHTML = `
+        <label>Project Image:</label>
+        <div id="projectBox" class="image-upload-box">
+          <span id="projectIcon">➕</span>
+          <img id="previewImage" />
+        </div>
+        <input type="file" id="projectImageFile" accept="image/*" style="display:none;" />
+        <div class="inputspro">
+          <label>Project Title:
+            <input type="text" id="projectTitle" value="${project.title}" required />
+          </label>
+          <label>Details:
+            <textarea id="details" required>${project.details}</textarea>
+          </label>
+          <label>Technologies Used:
+            <input type="text" id="technologiesused" value="${project.technologiesused}" required />
+          </label>
+          <label>Role:
+            <input type="text" id="Role" value="${project.Role}" required />
+          </label>
+          <label>View Online:
+            <input type="url" id="ViewOnline" value="${project.ViewOnline}" required />
+          </label>
+          <label>Project Type:
+            <select id="projectType" required>
+              <option value="">Select Type</option>
+              <option value="web" ${project.type === "web" ? "selected" : ""}>Web Developer</option>
+              <option value="qa" ${project.type === "qa" ? "selected" : ""}>QA</option>
+            </select>
+          </label>
+        </div>
+        ${
+            isEdit
+                ? `<div class="centered-delete">
+                     <button type="button" id="deleteProjectBtn">Delete Project</button>
+                   </div>`
+                : ""
+        }
+      `;
+    document.getElementById("previewImage").src = project.image || "";
+    document.getElementById("previewImage").style.display = project.image
+        ? "block"
+        : "none";
+    document.getElementById("projectBox").onclick = () =>
+        document.getElementById("projectImageFile").click();
+    setupImagePreview("projectImageFile", "previewImage", "projectIcon");
+    if (isEdit) {
+        const delBtn = document.getElementById("deleteProjectBtn");
+        if (delBtn) {
+            delBtn.onclick = () => {
+                currentDeleteTab = "projectTab";
+                currentDeleteId = project.id;
+                deleteModal.classList.remove("hidden");
+            };
+        }
+    }
+    formModal.classList.remove("hidden");
+}
+
+// -------------------------------
+// 11. حفظ النموذج لأي تبويب
 // -------------------------------
 dataForm.addEventListener("submit", (e) => {
     e.preventDefault();
-
     const csrfToken = getCSRF();
 
     switch (currentInnerTab) {
@@ -435,13 +525,10 @@ dataForm.addEventListener("submit", (e) => {
                 });
             break;
         }
-
         case "educationTab": {
             const degree = document.getElementById("degreeInput").value;
             const university = document.getElementById("universityInput").value;
-            const graduationYear = document.getElementById(
-                "graduationYearInput"
-            ).value;
+            const graduationYear = document.getElementById("graduationYearInput").value;
             const thedetails = document.getElementById("theDetailsInput").value;
             const newEntry = { degree, university, graduationYear, thedetails };
             let url = "/api/education";
@@ -459,6 +546,7 @@ dataForm.addEventListener("submit", (e) => {
                 },
                 body: JSON.stringify(newEntry),
             })
+                .then((res) => res.json())
                 .then(() => fetchEducation())
                 .then(() => {
                     formModal.classList.add("hidden");
@@ -466,7 +554,6 @@ dataForm.addEventListener("submit", (e) => {
                 });
             break;
         }
-
         case "experienceTab": {
             const jobTitle = document.getElementById("jobTitleInput").value;
             const company = document.getElementById("companyInput").value;
@@ -488,6 +575,7 @@ dataForm.addEventListener("submit", (e) => {
                 },
                 body: JSON.stringify(newEntry),
             })
+                .then((res) => res.json())
                 .then(() => fetchExperience())
                 .then(() => {
                     formModal.classList.add("hidden");
@@ -495,7 +583,6 @@ dataForm.addEventListener("submit", (e) => {
                 });
             break;
         }
-
         case "skillsTabInner": {
             const skillName = document.getElementById("skillNameInput").value;
             const level = document.getElementById("levelInput").value;
@@ -515,6 +602,7 @@ dataForm.addEventListener("submit", (e) => {
                 },
                 body: JSON.stringify(newEntry),
             })
+                .then((res) => res.json())
                 .then(() => fetchSkills())
                 .then(() => {
                     formModal.classList.add("hidden");
@@ -522,12 +610,10 @@ dataForm.addEventListener("submit", (e) => {
                 });
             break;
         }
-
         case "projectTab": {
             const title = document.getElementById("projectTitle").value;
             const details = document.getElementById("details").value;
-            const technologiesused =
-                document.getElementById("technologiesused").value;
+            const technologiesused = document.getElementById("technologiesused").value;
             const Role = document.getElementById("Role").value;
             const ViewOnline = document.getElementById("ViewOnline").value;
             const type = document.getElementById("projectType").value;
@@ -566,24 +652,19 @@ dataForm.addEventListener("submit", (e) => {
             break;
         }
     }
-
-    formModal.classList.add("hidden");
-    dataForm.reset();
 });
 
 // -------------------------------
-// 7. تعديل، حذف، تصفية
+// 12. تعديل/حذف سجل
 // -------------------------------
 function editItem(tab, id) {
     openForm("edit", tab, id);
 }
-
 function confirmDelete(tab, id) {
     currentDeleteTab = tab;
     currentDeleteId = id;
     deleteModal.classList.remove("hidden");
 }
-
 confirmDeleteBtn.addEventListener("click", () => {
     if (currentDeleteTab && currentDeleteId !== null) {
         let apiURL = "";
@@ -596,17 +677,14 @@ confirmDeleteBtn.addEventListener("click", () => {
                 apiURL = `/api/education/${currentDeleteId}`;
                 reloadFunction = fetchEducation;
                 break;
-
             case "experienceTab":
                 apiURL = `/api/experience/${currentDeleteId}`;
                 reloadFunction = fetchExperience;
                 break;
-
             case "skillsTabInner":
                 apiURL = `/api/skills/${currentDeleteId}`;
                 reloadFunction = fetchSkills;
                 break;
-
             case "projectTab":
                 apiURL = `/api/projects/${currentDeleteId}`;
                 reloadFunction = fetchProjects;
@@ -629,14 +707,67 @@ confirmDeleteBtn.addEventListener("click", () => {
         });
     }
 });
-
 cancelDeleteBtn.addEventListener("click", () => {
     deleteModal.classList.add("hidden");
     currentDeleteTab = null;
     currentDeleteId = null;
 });
+cancelBtn.addEventListener("click", () => {
+    formModal.classList.add("hidden");
+    dataForm.reset();
+});
+
 // -------------------------------
-// 8. عرض وتصفية المشاريع
+// 13. عرض الجداول (تعليم/خبرة/مهارات)
+// -------------------------------
+function renderEducationTable() {
+    const tbody = document.querySelector("#educationTable tbody");
+    tbody.innerHTML = "";
+    educationData.forEach((item) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+    <td>${item.degree}</td>
+     <td>${item.university}</td>
+      <td>${item.thedetails}</td>
+      <td>${item.graduationYear}</td>
+       <td> <button class="edit" onclick="editItem('educationTab', ${item.id})">تعديل</button>
+       <button class="delete" onclick="confirmDelete('educationTab', ${item.id})">حذف</button> </td>
+    `;
+        tbody.appendChild(tr);
+    });
+}
+function renderExperienceTable() {
+    const tbody = document.querySelector("#experienceTable tbody");
+    tbody.innerHTML = "";
+    experienceData.forEach((item) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+    <td>${item.jobTitle}</td>
+     <td>${item.company}</td>
+     <td>${item.Details}</td>
+      <td>${item.years}</td>
+       <td> <button class="edit" onclick="editItem('experienceTab', ${item.id})">تعديل</button>
+       <button class="delete" onclick="confirmDelete('experienceTab', ${item.id})">حذف</button> </td>
+       `;
+        tbody.appendChild(tr);
+    });
+}
+function renderSkillsInnerTable() {
+    const tbody = document.querySelector("#skillsInnerTable tbody");
+    tbody.innerHTML = "";
+    skillsInnerData.forEach((item) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+    <td>${item.skillName}</td>
+    <td>${item.level}</td> 
+    <td> <button class="edit" onclick="editItem('skillsTabInner', ${item.id})">تعديل</button>
+    <button class="delete" onclick="confirmDelete('skillsTabInner', ${item.id})">حذف</button> </td>`;
+        tbody.appendChild(tr);
+    });
+}
+
+// -------------------------------
+// 14. المشاريع (العرض والتصفية)
 // -------------------------------
 function renderProjects(data) {
     projectContainer.innerHTML = "";
@@ -674,7 +805,6 @@ function renderProjects(data) {
         projectContainer.appendChild(card);
     });
 }
-
 function filterProjects(type) {
     const cards = projectContainer.querySelectorAll(".card");
     cards.forEach((card) => {
@@ -692,196 +822,13 @@ function filterProjects(type) {
     else if (type === "qa") qaBtn.classList.add("active");
 }
 
-addProjectBtn.addEventListener("click", () => openProjectModal(null, "add"));
-
-function openProjectModal(project = null, action = "add") {
-    const isEdit = action === "edit";
-
-    const defaultProject = {
-        id: null,
-        title: "",
-        details: "",
-        technologiesused: "",
-        Role: "",
-        ViewOnline: "",
-        image: "",
-        type: "",
-    };
-
-    project = project || defaultProject;
-
-    currentInnerTab = "projectTab";
-    currentAction = action;
-    currentEditId = project.id;
-
-    formTitle.textContent = isEdit ? "Edit Project" : "Add Project";
-
-    formFieldsContainer.innerHTML = `
-    <label>Project Image:</label>
-    <div id="projectBox" class="image-upload-box">
-      <span id="projectIcon">➕</span>
-      <img id="previewImage" />
-    </div>
-    <input type="file" id="projectImageFile" accept="image/*" style="display:none;" />
-    <div class="inputspro">
-      <label>Project Title:
-        <input type="text" id="projectTitle" value="${
-            project.title
-        }" required />
-      </label>
-      <label>Details:
-        <textarea id="details" required>${project.details}</textarea>
-      </label>
-      <label>Technologies Used:
-        <input type="text" id="technologiesused" value="${
-            project.technologiesused
-        }" required />
-      </label>
-      <label>Role:
-        <input type="text" id="Role" value="${project.Role}" required />
-      </label>
-      <label>View Online:
-        <input type="url" id="ViewOnline" value="${
-            project.ViewOnline
-        }" required />
-      </label>
-      <label>Project Type:
-        <select id="projectType" required>
-          <option value="">Select Type</option>
-          <option value="web" ${
-              project.type === "web" ? "selected" : ""
-          }>Web Developer</option>
-          <option value="qa" ${
-              project.type === "qa" ? "selected" : ""
-          }>QA</option>
-        </select>
-      </label>
-    </div>
-    ${
-        isEdit
-            ? `<div class="centered-delete">
-             <button type="button" id="deleteProjectBtn">Delete Project</button>
-           </div>`
-            : ""
-    }
-  `;
-
-    document.getElementById("previewImage").src = project.image || "";
-    document.getElementById("previewImage").style.display = project.image
-        ? "block"
-        : "none";
-    document.getElementById("projectBox").onclick = () =>
-        document.getElementById("projectImageFile").click();
-
-    setupImagePreview("projectImageFile", "previewImage", "projectIcon");
-
-    if (isEdit) {
-        const delBtn = document.getElementById("deleteProjectBtn");
-        if (delBtn) {
-            delBtn.onclick = () => {
-                currentDeleteTab = "projectTab";
-                currentDeleteId = project.id;
-                deleteModal.classList.remove("hidden");
-            };
-        }
-    }
-
-    formModal.classList.remove("hidden");
-}
-
-function renderEducationTable() {
-    const tbody = document.querySelector("#educationTable tbody");
-    tbody.innerHTML = "";
-    educationData.forEach((item) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-    <td>${item.degree}</td>
-     <td>${item.university}</td>
-      <td>${item.thedetails}</td>
-      <td>${item.graduationYear}</td>
-       <td> <button class="edit" onclick="editItem('educationTab', ${item.id})">تعديل</button>
-       <button class="delete" onclick="confirmDelete('educationTab', ${item.id})">حذف</button> </td>
-    `;
-        tbody.appendChild(tr);
-    });
-}
-
-function renderExperienceTable() {
-    const tbody = document.querySelector("#experienceTable tbody");
-    tbody.innerHTML = "";
-    experienceData.forEach((item) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-    <td>${item.jobTitle}</td>
-     <td>${item.company}</td>
-     <td>${item.Details}</td>
-      <td>${item.years}</td>
-       <td> <button class="edit" onclick="editItem('experienceTab', ${item.id})">تعديل</button>
-       <button class="delete" onclick="confirmDelete('experienceTab', ${item.id})">حذف</button> </td>
-       `;
-        tbody.appendChild(tr);
-    });
-}
-
-function renderSkillsInnerTable() {
-    const tbody = document.querySelector("#skillsInnerTable tbody");
-    tbody.innerHTML = "";
-    skillsInnerData.forEach((item) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-    <td>${item.skillName}</td>
-    <td>${item.level}</td> 
-    <td> <button class="edit" onclick="editItem('skillsTabInner', ${item.id})">تعديل</button>
-    <button class="delete" onclick="confirmDelete('skillsTabInner', ${item.id})">حذف</button> </td>`;
-        tbody.appendChild(tr);
-    });
-}
-
-cancelBtn.addEventListener("click", () => {
-    formModal.classList.add("hidden");
-    dataForm.reset();
-});
-
+// -------------------------------
+// 15. عند تحميل الصفحة: جلب كل البيانات مرة واحدة
+// -------------------------------
 document.addEventListener("DOMContentLoaded", () => {
-    fetch("/api/personal-info")
-        .then((res) => res.json())
-        .then((data) => {
-            if (data) {
-                personalInfoData = [data];
-                updatePersonalInfoCard();
-            }
-        });
     fetchPersonalInfo();
     fetchEducation();
     fetchExperience();
     fetchSkills();
     fetchProjects();
-    fetch("/api/education")
-        .then((res) => res.json())
-        .then((data) => {
-            educationData = data;
-            renderEducationTable();
-        });
-
-    fetch("/api/experience")
-        .then((res) => res.json())
-        .then((data) => {
-            experienceData = data;
-            renderExperienceTable();
-        });
-
-    fetch("/api/skills")
-        .then((res) => res.json())
-        .then((data) => {
-            skillsInnerData = data;
-            renderSkillsInnerTable();
-        });
-
-    fetch("/api/projects")
-        .then((res) => res.json())
-        .then((data) => {
-            projectsData = data;
-            renderProjects(data);
-            filterProjects("all");
-        });
 });

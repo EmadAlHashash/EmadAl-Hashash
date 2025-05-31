@@ -7,7 +7,8 @@
    <div class="login-container">
     <div class="login-glass">
       <h2>Login</h2>
-      <form>
+      <form method="POST" action="{{ route('login') }}">
+        @csrf
         <div class="input-group">
           <label for="email">Email</label>
           <div class="input-icon-wrapper">
@@ -17,6 +18,7 @@
               name="email"
               placeholder="Enter your email"
               required
+              value="{{ old('email') }}"
             />
             <i class="fa-solid fa-envelope"></i>
           </div>
@@ -34,6 +36,11 @@
             <i class="fa-solid fa-lock"></i>
           </div>
         </div>
+        @if($errors->any())
+          <div style="color:red;text-align:center;margin-bottom:10px;">
+            {{ $errors->first() }}
+          </div>
+        @endif
         <button class="login-btn" type="submit">Sign In</button>
       </form>
     </div>
