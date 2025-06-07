@@ -8,9 +8,17 @@ use App\Models\Project;
 
 class ProjectController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(Project::orderBy('created_at', 'desc')->get());
+        $type = $request->query('type');
+
+        $query = Project::orderBy('created_at', 'desc');
+
+        if ($type && $type !== 'all') {
+            $query->where('type', $type);
+        }
+
+        return response()->json($query->paginate(3));
     }
 
     public function store(Request $request)
@@ -24,11 +32,14 @@ class ProjectController extends Controller
             'type'             => 'required|string|max:255',
             'image'            => 'nullable|image|max:2048',
         ]);
+
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('project_images', 'public');
             $data['image'] = asset('storage/' . $data['image']);
         }
+
         $project = Project::create($data);
+
         return response()->json($project, 201);
     }
 
@@ -40,6 +51,7 @@ class ProjectController extends Controller
     public function update(Request $request, $id)
     {
         $project = Project::findOrFail($id);
+
         $data = $request->validate([
             'title'            => 'sometimes|required|string|max:255',
             'details'          => 'sometimes|required|string',
@@ -49,24 +61,31 @@ class ProjectController extends Controller
             'type'             => 'sometimes|required|string|max:255',
             'image'            => 'nullable|image|max:2048',
         ]);
+
         if ($request->hasFile('image')) {
             if ($project->image && file_exists(public_path(parse_url($project->image, PHP_URL_PATH)))) {
                 @unlink(public_path(parse_url($project->image, PHP_URL_PATH)));
             }
+
             $data['image'] = $request->file('image')->store('project_images', 'public');
             $data['image'] = asset('storage/' . $data['image']);
         }
+
         $project->update($data);
+
         return response()->json($project);
     }
 
     public function destroy($id)
     {
         $project = Project::findOrFail($id);
+
         if ($project->image && file_exists(public_path(parse_url($project->image, PHP_URL_PATH)))) {
             @unlink(public_path(parse_url($project->image, PHP_URL_PATH)));
         }
+
         $project->delete();
+
         return response()->json(['message' => 'Deleted'], 204);
     }
 }

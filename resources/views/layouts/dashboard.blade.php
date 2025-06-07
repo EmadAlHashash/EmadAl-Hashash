@@ -8,6 +8,12 @@
   <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
 </head>
 <body>
+  <!-- أضف هذا في مكان مناسب داخل الصفحة -->
+<div class="page-loader" id="pageLoader">
+  <div></div>
+  <div></div>
+  <div></div>
+</div>
   @yield('content')
   <script src="{{ asset('js/dashboard.js') }}"></script>
 </body>

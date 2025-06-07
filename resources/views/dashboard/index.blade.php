@@ -64,7 +64,7 @@
                     <table id="educationTable">
                         <thead>
                             <tr>
-                                <th>Academic Qualification</th>
+                                <th>Major</th>
                                 <th>University Name</th>
                                 <th>Details</th>
                                 <th>Graduation Year</th>
@@ -73,10 +73,12 @@
                         </thead>
                         <tbody></tbody>
                     </table>
+                    <div id="educationPagination" class="pagination"></div>
+
                 </div>
 
                 <div id="experienceTab" class="inner-content-tab">
-                    <button id="addExperienceBtn" class="add-btn">addExperience</button>
+                    <button id="addExperienceBtn" class="add-btn">add Experience</button>
                     <table id="experienceTable">
                         <thead>
                             <tr>
@@ -89,10 +91,12 @@
                         </thead>
                         <tbody></tbody>
                     </table>
+                    <div id="experiencePagination" class="pagination"></div>
+
                 </div>
 
                 <div id="skillsTabInner" class="inner-content-tab">
-                    <button id="addSkillInnerBtn" class="add-btn">addSkillInner</button>
+                    <button id="addSkillInnerBtn" class="add-btn">Add skill</button>
                     <table id="skillsInnerTable">
                         <thead>
                             <tr>
@@ -103,6 +107,7 @@
                         </thead>
                         <tbody></tbody>
                     </table>
+                    <div id="skillsPagination" class="pagination"></div>
                 </div>
             </section>
 
@@ -125,12 +130,14 @@
 
                 <div class="dashboard" id="projectContainer">
                     <!-- <div class="card" data-type="web">
-                                  <img src="" alt="projectimage" />
-                                  <div class="card-content">
-                                    <h2></h2>
-                                  </div>
-                                </div> -->
+                                          <img src="" alt="projectimage" />
+                                          <div class="card-content">
+                                            <h2></h2>
+                                          </div>
+                                        </div> -->
                 </div>
+                <div id="projectsPagination" class="pagination"></div>
+
             </section>
         </main>
     </div>

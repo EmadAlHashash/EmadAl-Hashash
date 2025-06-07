@@ -36,9 +36,9 @@
                         <div class="nav-inner">
                             <ul>
                                 <li><a href="{{ route('home') }}" class="nav-item link-item">home</a></li>
-                                <li><a href="{{ route('about') }}" class="nav-item link-item">about</a></li>
-                                <li><a href="{{ route('portfolio') }}" class="nav-item link-item">portfolio</a></li>
-                                <li><a href="{{ route('contact') }}" class="nav-item link-item">contact</a></li>
+                                <li><a href="#about" class="nav-item link-item">about</a></li>
+                                <li><a href="#portfolio" class="nav-item link-item">portfolio</a></li>
+                                <li><a href="#contact" class="nav-item link-item">contact</a></li>
                             </ul>
                         </div>
                     </nav>
@@ -147,35 +147,22 @@
                         <h2>recent work</h2>
                     </div>
                 </div>
-                <div class="row">
-                    @foreach ($projects as $project)
-                        <div class="portfolio-item">
-                            <div class="portfolio-item-thumbnail">
-                                <img src="{{ $project->image ?? asset('img/default.png') }}" alt="">
-                            </div>
-                            <h3 class="portfolio-item-title">{{ $project->title }}</h3>
-                            <button type="button" class="btn view-project-btn">view project</button>
-                            <div class="portfolio-item-details">
-                                <div class="description">
-                                    <p>{{ $project->details }}</p>
-                                </div>
-                                <div class="general-info">
-                                    <ul>
-                                        <li>Created -
-                                            <span>{{ $project->created_at ? $project->created_at->format('d M Y') : '' }}</span>
-                                        </li>
-                                        <li>technologies used - <span>{{ $project->technologiesused ?? '' }}</span></li>
-                                        <li>Role - <span>{{ $project->Role ?? '' }}</span></li>
-                                        <li>View Online - <span><a
-                                                    href="{{ $project->ViewOnline ?? '#' }}">{{ $project->ViewOnline ?? '' }}</a></span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
+                <div class="portfolio-filter">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="web">Web</button>
+                    <button class="filter-btn" data-filter="qa">QA</button>
                 </div>
+                <div class="row" id="project-list">
+                    <!-- سيتم تعبئة المشاريع ديناميكيًا هنا -->
+                </div>
+
             </div>
+            <div class="pagination-wrapper">
+                <button class="pagination-btn prev" disabled>Previous</button>
+                <button class="pagination-btn next">Next</button>
+            </div>
+
+
         </section>
         <!-- end portfolio -->
 
@@ -189,21 +176,37 @@
                 </div>
                 <div class="row">
                     <div class="contact-form">
-                        <form>
+                        @if (session('success'))
+                            <div class="alert alert-success">
+                                {{ session('success') }}
+                            </div>
+                        @endif
+                        @if ($errors->any())
+                            <div class="alert alert-danger">
+                                <ul style="margin:0;">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                        <form method="POST" action="{{ route('contact.send') }}">
+                            @csrf
                             <div class="row">
                                 <div class="input-group">
-                                    <input type="text" class="input-control" placeholder="Name" name="name" required>
+                                    <input type="text" class="input-control" placeholder="Name" name="name"
+                                        value="{{ old('name') }}" required>
                                 </div>
                                 <div class="input-group">
                                     <input type="email" class="input-control" placeholder="Email" name="email"
-                                        required>
+                                        value="{{ old('email') }}" required>
                                 </div>
                                 <div class="input-group">
                                     <input type="text" class="input-control" placeholder="Subject" name="subject"
-                                        required>
+                                        value="{{ old('subject') }}" required>
                                 </div>
                                 <div class="input-group">
-                                    <textarea name="message" class="input-control" placeholder="Message" required></textarea>
+                                    <textarea name="message" class="input-control" placeholder="Message" required>{{ old('message') }}</textarea>
                                 </div>
                                 <div class="submit-btn">
                                     <button type="submit" class="btn">send message</button>
@@ -267,4 +270,15 @@
         </div>
     </div>
 
+    @if (session('success'))
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Message sent successfully!',
+                text: '{{ session('success') }}',
+                confirmButtonText: 'إغلاق'
+            });
+        </script>
+    @endif
 @endsection

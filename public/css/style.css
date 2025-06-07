@@ -413,7 +413,6 @@ section.fade-out{
     padding: 0 15px;
     width: 100%;
     text-align: center;
-    margin-bottom: 40px;
 }
 .section-title h2{
     font-size: 40px;
@@ -826,11 +825,66 @@ button{
 
 
 
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.pagination-btn {
+  background-color: rgba(255, 165, 0, 0.1);
+  color: orange;
+  border: 1px solid orange;
+  padding: 0.5rem 1.5rem;
+  border-radius: 1rem;
+  cursor: pointer;
+  font-weight: bold;
+  backdrop-filter: blur(6px);
+  transition: background-color 0.3s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: orange;
+  color: #111;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 
 
 
 
 
+.portfolio-filter {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.filter-btn {
+  padding: 8px 15px;
+  margin-right: 8px;
+  cursor: pointer;
+  border: none;
+  background-color: var(--main-color);
+  color: #fff;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, color 0.3s;
+}
+.filter-btn:hover,
+.filter-btn.active {
+  background-color: var(--orange);
+  color: #fff;
+}
+.portfolio-item {
+  display: block; /* أو flex حسب التصميم */
+}
+.portfolio-item.hidden {
+  display: none !important;
+}
 
 
 
