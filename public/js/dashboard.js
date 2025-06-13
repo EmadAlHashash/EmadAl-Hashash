@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentExperiencePage = 1,
         experiencePerPage = 5;
     let currentSkillsPage = 1,
-        skillsPerPage = 4;
+        skillsPerPage = 5;
 
     // Loader
     function showLoader() {

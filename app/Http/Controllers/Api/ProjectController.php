@@ -11,14 +11,22 @@ class ProjectController extends Controller
     public function index(Request $request)
     {
         $type = $request->query('type');
-
         $query = Project::orderBy('created_at', 'desc');
 
         if ($type && $type !== 'all') {
             $query->where('type', $type);
         }
 
-        return response()->json($query->paginate(3));
+        if ($request->query('dashboard') === 'true') {
+            $projects = $query->paginate(3);
+            // في حالة لوحة التحكم نستفيد من هيكلية paginate
+        } else {
+            $projects = $query->get();
+            // لضمان توافق الشكل مع الواجهة الرئيسية يمكننا لف النتيجة داخل مفتاح data
+            $projects = ['data' => $projects];
+        }
+
+        return response()->json($projects);
     }
 
     public function store(Request $request)

@@ -104,14 +104,11 @@ function portfolioItemDetails(portfolioItem) {
         ".portfolio-item-details"
     ).innerHTML;
 }
-
 let currentPage = 1;
 let lastPage = 1;
 let currentFilter = "all";
 
-const container = document.querySelector(
-    ".portfolio-section .row:last-of-type"
-);
+const container = document.querySelector(".portfolio-section .row:last-of-type");
 const buttons = document.querySelectorAll(".portfolio-filter .filter-btn");
 const prevBtn = document.querySelector(".pagination-btn.prev");
 const nextBtn = document.querySelector(".pagination-btn.next");
@@ -121,32 +118,33 @@ async function filterProjects(type = "all", page = 1) {
     currentPage = page;
     setActiveProjectFilter(type);
     container.innerHTML = `
-   <div class="page-loader">
-        <div></div>
-        <div></div>
-        <div></div>
-    </div>`;
+        <div class="page-loader">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>`;
 
     try {
-        const response = await fetch(`/api/projects?type=${type}&page=${page}`);
+        // إضافة معامل dashboard=true للتأكد من استخدام paginate(3) في الكود بالخلفية
+        const response = await fetch(`/api/projects?type=${type}&page=${page}&dashboard=true`);
         const data = await response.json();
 
         if (!data || !data.data || !data.data.length) {
             container.innerHTML = `
-    <div style="
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      color: var(--main-color);
-      font-size: 18px;
-      padding: 10px;
-      height: 100%;
-      min-height: 100px;
-      width: 100%;
-    ">
-      No projects found.
-    </div>`;
+                <div style="
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    text-align: center;
+                    color: var(--main-color);
+                    font-size: 18px;
+                    padding: 10px;
+                    height: 100%;
+                    min-height: 100px;
+                    width: 100%;
+                ">
+                    No projects found.
+                </div>`;
             updatePaginationButtons();
             return;
         }
@@ -154,34 +152,28 @@ async function filterProjects(type = "all", page = 1) {
         lastPage = data.last_page;
 
         const html = data.data
-            .map(
-                (project) => `
-      <div class="portfolio-item">
-        <div class="portfolio-item-thumbnail">
-          <img src="${project.image || "/img/default.png"}" alt="">
-        </div>
-        <h3 class="portfolio-item-title">${project.title}</h3>
-        <button type="button" class="btn view-project-btn">view project</button>
-        <div class="portfolio-item-details">
-          <div class="description">
-            <p>${project.details}</p>
-          </div>
-          <div class="general-info">
-            <ul>
-              <li>Created - <span>${formatDate(project.created_at)}</span></li>
-              <li>technologies used - <span>${
-                  project.technologiesused
-              }</span></li>
-              <li>Role - <span>${project.Role}</span></li>
-              <li>View Online - <span><a href="${
-                  project.ViewOnline
-              }" target="_blank">${project.ViewOnline}</a></span></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    `
-            )
+            .map((project) => `
+                <div class="portfolio-item">
+                    <div class="portfolio-item-thumbnail">
+                        <img src="${project.image || "/img/default.png"}" alt="">
+                    </div>
+                    <h3 class="portfolio-item-title">${project.title}</h3>
+                    <button type="button" class="btn view-project-btn">view project</button>
+                    <div class="portfolio-item-details">
+                        <div class="description">
+                            <p>${project.details}</p>
+                        </div>
+                        <div class="general-info">
+                            <ul>
+                                <li>Created - <span>${formatDate(project.created_at)}</span></li>
+                                <li>technologies used - <span>${project.technologiesused}</span></li>
+                                <li>Role - <span>${project.Role}</span></li>
+                                <li>View Online - <span><a href="${project.ViewOnline}" target="_blank">${project.ViewOnline}</a></span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `)
             .join("");
 
         container.innerHTML = html;
@@ -233,7 +225,7 @@ if (nextBtn) {
     });
 }
 
-// تحميل أولي
+// تحميل أولي عند تحميل الصفحة
 document.addEventListener("DOMContentLoaded", () => {
     filterProjects("all", 1);
 });

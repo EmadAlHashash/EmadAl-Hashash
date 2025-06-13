@@ -130,13 +130,14 @@
 
                 <div class="dashboard" id="projectContainer">
                     <!-- <div class="card" data-type="web">
-                                          <img src="" alt="projectimage" />
-                                          <div class="card-content">
-                                            <h2></h2>
-                                          </div>
-                                        </div> -->
+                                              <img src="" alt="projectimage" />
+                                              <div class="card-content">
+                                                <h2></h2>
+                                              </div>
+                                            </div> -->
+
                 </div>
-                <div id="projectsPagination" class="pagination"></div>
+                    <div id="projectsPagination" class="pagination"></div>
 
             </section>
         </main>

@@ -41,9 +41,9 @@ body {
 
 .pagination button {
   padding: 6px 18px;
-  border: 1px solid #ccc;
-  background: #fff;
-  color: #333;
+  border: 1px solid orange;
+  background:orange;
+  color: #111;
   font-weight: bold;
   border-radius: 4px;
   cursor: pointer;
@@ -58,8 +58,8 @@ body {
 }
 
 .pagination button:not(:disabled):hover {
-  background: var(--main-color, #2196f3);
-  color: #fff;
+  background:rgba(255, 165, 0, 0.1);
+  color: orange;
   border-color: var(--main-color, #2196f3);
 }
 .container {
@@ -256,8 +256,8 @@ body {
     height: 100%;
     width: 100%;
     z-index: 999;
-    background-color: var(--white-alpha-25);
-    backdrop-filter: var(--backdrop-filter-blur);
+    background-color:  rgba(255,255,255,0.25);
+    backdrop-filter: blur(5px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -279,18 +279,18 @@ body {
 .page-loader div:nth-child(1){
     height: 60px;
     width: 60px;
-    border-color: var(--main-color);
+    border-color: #e02f6b;
 }
 .page-loader div:nth-child(2){
     height: 45px;
     width: 45px;
-    border-color: var(--blue);
+    border-color:  #0000ff;
     animation-duration: 1.2s;
 }
 .page-loader div:nth-child(3){
     height: 30px;
     width: 30px;
-    border-color: var(--orange);
+    border-color: #ffa500;
 }
 /* أزرار في الجداول */
 .action{
