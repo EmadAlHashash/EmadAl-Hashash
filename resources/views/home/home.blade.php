@@ -87,9 +87,14 @@
                         <h3>skills</h3>
                         <div class="skills">
                             @foreach ($skills as $skill)
-                                <div class="skill-item">{{ $skill->skillName }} <span
+                                <div class="skill-item">
+                                    {{ $skill->skillName }} <span
                                         style="font-size: 12px; color: #888;">({{ $skill->level }})</span></div>
                             @endforeach
+                        </div>
+                        <div class="skills-pagination-wrapper">
+                            <button class="skills-pagination-btn prev" disabled>Previous</button>
+                            <button class="skills-pagination-btn next">Next</button>
                         </div>
                         <div class="about-tabs">
                             <button type="button" class="tab-item active" data-target="#education">education</button>

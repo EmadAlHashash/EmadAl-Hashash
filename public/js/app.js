@@ -229,3 +229,42 @@ if (nextBtn) {
 document.addEventListener("DOMContentLoaded", () => {
     filterProjects("all", 1);
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+    const skillsPerPage = 8;
+    let currentSkillPage = 1;
+
+    const skillItems = Array.from(document.querySelectorAll(".skill-item"));
+    const skillPrevBtn = document.querySelector(".skills-pagination-btn.prev");
+    const skillNextBtn = document.querySelector(".skills-pagination-btn.next");
+
+    const totalSkillPages = Math.ceil(skillItems.length / skillsPerPage);
+
+    function updateSkillsPagination() {
+        skillItems.forEach((item, index) => {
+            item.style.display = (index >= (currentSkillPage - 1) * skillsPerPage &&
+                                  index < currentSkillPage * skillsPerPage)
+                                ? "flex"
+                                : "none";
+        });
+
+        skillPrevBtn.disabled = currentSkillPage === 1;
+        skillNextBtn.disabled = currentSkillPage === totalSkillPages;
+    }
+
+    skillPrevBtn.addEventListener("click", () => {
+        if (currentSkillPage > 1) {
+            currentSkillPage--;
+            updateSkillsPagination();
+        }
+    });
+
+    skillNextBtn.addEventListener("click", () => {
+        if (currentSkillPage < totalSkillPages) {
+            currentSkillPage++;
+            updateSkillsPagination();
+        }
+    });
+
+    updateSkillsPagination();
+});

@@ -543,6 +543,8 @@ button{
 }
 .about-text .skills {
     display: flex;
+    justify-content: flex-start;
+    align-items: center;
     flex-wrap: wrap;
 }
 .about-text .skill-item{
@@ -552,6 +554,9 @@ button{
     padding: 5px 15px;
     margin: 0 10px 10px 0;
     border-radius: 20px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
 }
 .about-tabs{
     margin-top: 20px;
@@ -825,14 +830,14 @@ button{
 
 
 
-.pagination-wrapper {
+.pagination-wrapper , .skills-pagination-wrapper{
   display: flex;
   justify-content: center;
   gap: 1rem;
   margin-top: 2rem;
 }
 
-.pagination-btn {
+.pagination-btn , .skills-pagination-btn{
   background-color: rgba(255, 165, 0, 0.1);
   color: orange;
   border: 1px solid orange;
@@ -844,12 +849,12 @@ button{
   transition: background-color 0.3s ease;
 }
 
-.pagination-btn:hover:not(:disabled) {
+.pagination-btn:hover:not(:disabled) , .skills-pagination-btn:hover:not(:disabled){
   background-color: orange;
   color: #111;
 }
 
-.pagination-btn:disabled {
+.pagination-btn:disabled , .skills-pagination-btn:disabled{
   opacity: 0.4;
   cursor: not-allowed;
 }
